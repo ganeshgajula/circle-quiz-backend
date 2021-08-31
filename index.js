@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const users = require("./routes/users.router");
 const quizzes = require("./routes/quizzes.router");
 const initializeDbConnection = require("./db/db.connect");
 
@@ -11,12 +12,13 @@ app.use(cors());
 const PORT = 4000;
 initializeDbConnection();
 
+app.use("/users", users);
 app.use("/quizzes", quizzes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Circle Quiz!");
 });
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log(`Server is running at port ${PORT}`);
 });
