@@ -6,6 +6,12 @@ const UserSchema = new mongoose.Schema(
     lastname: { type: String, require: "last name is required" },
     email: { type: String, required: "email is required" },
     password: { type: String, required: "password is required" },
+    quizzesPlayed: [
+      {
+        quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
+        score: Number,
+      },
+    ],
   },
   {
     timestamps: true,
