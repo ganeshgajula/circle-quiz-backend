@@ -31,6 +31,19 @@ app.use((req, res) => {
     .json({ success: false, message: "Route not found on server." });
 });
 
+/**
+ * Error Handler
+ * Note: Do not move
+ */
+app.use((err, req, res, next) => {
+  console.error(error.stack);
+  res.status(500).json({
+    success: false,
+    message: "Error occurred, kindly check the error message for more details",
+    errorMessage: err.message,
+  });
+});
+
 app.listen(process.env.PORT || PORT, () => {
   console.log(`Server is running at port ${PORT}`);
 });
