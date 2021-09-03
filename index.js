@@ -21,6 +21,16 @@ app.get("/", (req, res) => {
   res.send("Welcome to Circle Quiz!");
 });
 
+/**
+ * 404 Route Handler
+ * Note: Do not move. This should be the last route
+ */
+app.use((req, res) => {
+  res
+    .status(404)
+    .json({ success: false, message: "Route not found on server." });
+});
+
 app.listen(process.env.PORT || PORT, () => {
   console.log(`Server is running at port ${PORT}`);
 });
