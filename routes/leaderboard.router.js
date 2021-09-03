@@ -9,7 +9,17 @@ router.route("/").get(async (req, res) => {
       path: "userId quizId",
       select: "firstname lastname quizName",
     });
-    res.json({ success: true, leaderBoard: leaderBoardScores });
+
+    const sortedLeaderBoard = leaderBoardScores.sort(
+      (a, b) => b.score - a.score
+    );
+
+    const leaderBoardToppers = sortedLeaderBoard.slice(0, 5);
+
+    res.json({
+      success: true,
+      leaderBoardToppers,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
