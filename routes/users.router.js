@@ -89,8 +89,10 @@ router
   .route("/:email")
   .get(async (req, res) => {
     try {
-      const { user } = req;
-      res.json({ success: true, user });
+      let { user } = req;
+      let populatedUser = await user.populate("quizzesPlayed.quizId");
+
+      res.json({ success: true, user: populatedUser });
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -105,7 +107,11 @@ router
       let { user } = req;
       const userUpdates = req.body;
       user = extend(user, userUpdates);
-      const updatedUser = await user.save();
+      let updatedUser = await user.save();
+      updatedUser = await updatedUser.populate({
+        path: "quizzesPlayed.quizId",
+      });
+
       res.status(201).json({ success: true, updatedUser });
     } catch (error) {
       res.status(500).json({
@@ -116,5 +122,35 @@ router
       });
     }
   });
+
+router.route("/:email/playedquizzes").post(async (req, res) => {
+  try {
+    let { user } = req;
+    const playedQuizUpdates = req.body;
+
+    const isQuizAlreadyPlayed = user.quizzesPlayed.find(
+      (quiz) => quiz.quizId == playedQuizUpdates.quizId
+    );
+
+    isQuizAlreadyPlayed
+      ? user.quizzesPlayed.map((quiz) => {
+          if (quiz.quizId == playedQuizUpdates.quizId) {
+            quiz = extend(quiz, playedQuizUpdates);
+          }
+        })
+      : user.quizzesPlayed.push(playedQuizUpdates);
+
+    let updatedUser = await user.save();
+    updatedUser = await updatedUser.populate("quizzesPlayed.quizId");
+
+    res.status(201).json({ success: true, updatedUser });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Couldn't played quiz played data",
+      errorMessage: error.message,
+    });
+  }
+});
 
 module.exports = router;
