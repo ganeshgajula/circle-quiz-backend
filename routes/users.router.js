@@ -65,7 +65,7 @@ router.route("/authenticate").post(async (req, res) => {
 
 router.param("email", async (req, res, next, email) => {
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("-password");
 
     if (!user) {
       return res
@@ -90,8 +90,10 @@ router
   .get(async (req, res) => {
     try {
       let { user } = req;
-      let populatedUser = await user.populate("quizzesPlayed.quizId");
-
+      let populatedUser = await user.populate({
+        path: "quizzesPlayed.quizId",
+        select: "-questions",
+      });
       res.json({ success: true, user: populatedUser });
     } catch (error) {
       res.status(500).json({
@@ -110,6 +112,7 @@ router
       let updatedUser = await user.save();
       updatedUser = await updatedUser.populate({
         path: "quizzesPlayed.quizId",
+        select: "-questions",
       });
 
       res.status(201).json({ success: true, updatedUser });
@@ -141,7 +144,10 @@ router.route("/:email/playedquizzes").post(async (req, res) => {
       : user.quizzesPlayed.push(playedQuizUpdates);
 
     let updatedUser = await user.save();
-    updatedUser = await updatedUser.populate("quizzesPlayed.quizId");
+    updatedUser = await updatedUser.populate({
+      path: "quizzesPlayed.quizId",
+      select: "-questions",
+    });
 
     res.status(201).json({ success: true, updatedUser });
   } catch (error) {
