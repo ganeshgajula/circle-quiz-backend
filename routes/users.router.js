@@ -63,14 +63,14 @@ router.route("/authenticate").post(async (req, res) => {
   }
 });
 
-router.param("email", async (req, res, next, email) => {
+router.param("userId", async (req, res, next, id) => {
   try {
-    const user = await User.findOne({ email }).select("-password");
+    const user = await User.findById(id).select("-password");
 
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "No user found with entered email." });
+        .json({ success: false, message: "User not found" });
     }
 
     req.user = user;
@@ -79,14 +79,14 @@ router.param("email", async (req, res, next, email) => {
     res.status(500).json({
       success: false,
       message:
-        "Couldn't find user with entered email, kindly check the error message for more details",
+        "Couldn't find user with entered id, kindly check the error message for more details",
       errorMessage: error.message,
     });
   }
 });
 
 router
-  .route("/:email")
+  .route("/:userId")
   .get(async (req, res) => {
     try {
       let { user } = req;
@@ -126,7 +126,7 @@ router
     }
   });
 
-router.route("/:email/playedquizzes").post(async (req, res) => {
+router.route("/:userId/playedquizzes").post(async (req, res) => {
   try {
     let { user } = req;
     const playedQuizUpdates = req.body;
