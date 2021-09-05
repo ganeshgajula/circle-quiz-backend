@@ -15,7 +15,7 @@ router.route("/signup").post(async (req, res) => {
       return res.status(201).json({ success: true, user: savedUser });
     }
 
-    return res.json({
+    return res.status(409).json({
       success: false,
       message:
         "Account already exists with entered email, kindly use different email for signup.",
@@ -42,13 +42,13 @@ router.route("/authenticate").post(async (req, res) => {
         .status(200)
         .json({ success: true, userId: user._id, firstName: user.firstname });
     } else if (!user) {
-      return res.json({
+      return res.status(401).json({
         success: false,
         message:
           "This email is not registered with us. Kindly visit signup page and create a new account.",
       });
     }
-    return res.json({
+    return res.status(401).json({
       success: false,
       message:
         "Incorrect email or password kindly login with correct credentials.",
