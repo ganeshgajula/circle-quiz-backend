@@ -7,6 +7,7 @@ const leaderboard = require("./routes/leaderboard.router");
 const initializeDbConnection = require("./db/db.connect");
 const { errorHandler } = require("./middlewares/errorHandler");
 const { routeHandler } = require("./middlewares/routeHandler");
+const { authVerify } = require("./middlewares/authVerify");
 
 const app = express();
 app.use(express.json());
@@ -16,8 +17,8 @@ const PORT = 4000;
 initializeDbConnection();
 
 app.use("/users", users);
-app.use("/quizzes", quizzes);
-app.use("/leaderboard", leaderboard);
+app.use("/quizzes", authVerify, quizzes);
+app.use("/leaderboard", authVerify, leaderboard);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Circle Quiz!");
