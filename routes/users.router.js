@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
 const { User } = require("../models/user.model");
@@ -11,6 +12,8 @@ router.route("/signup").post(async (req, res) => {
 
     if (!user) {
       const newUser = new User(userData);
+      const salt = await bcrypt.genSalt(10);
+      newUser.password = await bcrypt.hash(newUser.password, salt);
       const savedUser = await newUser.save();
       return res.status(201).json({ success: true, user: savedUser });
     }
@@ -30,28 +33,31 @@ router.route("/signup").post(async (req, res) => {
   }
 });
 
-router.route("/authenticate").post(async (req, res) => {
+router.route("/login").post(async (req, res) => {
   try {
     const email = req.get("email");
     const password = req.get("password");
 
     const user = await User.findOne({ email });
 
-    if (user && user.password === password) {
-      return res
-        .status(200)
-        .json({ success: true, userId: user._id, firstName: user.firstname });
-    } else if (!user) {
+    if (user) {
+      const validPassword = await bcrypt.compare(password, user.password);
+
+      if (validPassword) {
+        return res
+          .status(200)
+          .json({ success: true, userId: user._id, firstName: user.firstname });
+      }
       return res.status(401).json({
         success: false,
         message:
-          "This email is not registered with us. Kindly visit signup page and create a new account.",
+          "Incorrect email or password kindly login with correct credentials.",
       });
     }
     return res.status(401).json({
       success: false,
       message:
-        "Incorrect email or password kindly login with correct credentials.",
+        "This email is not registered with us. Kindly visit signup page and create a new account.",
     });
   } catch (error) {
     res.status(500).json({
