@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const router = express.Router();
 const { User } = require("../models/user.model");
@@ -44,9 +45,18 @@ router.route("/login").post(async (req, res) => {
       const validPassword = await bcrypt.compare(password, user.password);
 
       if (validPassword) {
-        return res
-          .status(200)
-          .json({ success: true, userId: user._id, firstName: user.firstname });
+        const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
+          expiresIn: "24h",
+        });
+
+        return res.status(200).json({
+          success: true,
+          userDetails: {
+            userId: user._id,
+            firstName: user.firstname,
+            token: `Bearer ${token}`,
+          },
+        });
       }
       return res.status(401).json({
         success: false,
@@ -159,7 +169,7 @@ router.route("/:userId/playedquizzes").post(async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Couldn't played quiz played data",
+      message: "Couldn't played quiz data",
       errorMessage: error.message,
     });
   }
